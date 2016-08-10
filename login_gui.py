@@ -3,223 +3,6 @@
 import wx
 import csv
 
-class NumbersOnlyValidator(wx.PyValidator):
-	def __init__(self):
-		wx.PyValidator.__init__(self)
-#		print "initate"
-	def Clone(self):
-		return NumbersOnlyValidator()
-		
-	def Validate(self, win):
-		print "start"
-		textCtrl = self.GetWindow()
-		text = textCtrl.GetValue()
-		print text
-		for letter in text:
-			if letter < '0' or letter > '9':
-				wx.MessageBox("Enter numbers only", "Error")
-				textCtrl.SetFocus()
-				return False
-		return True
-	
-	def TransferToWindow(self):
-		return True
-	def TransferFromWindow(self):
-		return True
-
-class SettingFrame(wx.Frame):
-	def __init__(self, parent, title):
-		wx.Frame.__init__(self, parent, title = title)
-		
-		panel = wx.Panel(self, wx.ID_ANY)
-
-		# File Operation: import & export
-		sizerFileOp = wx.BoxSizer(wx.HORIZONTAL)
-		self.buttonImport = wx.Button(panel, label = "import", size = (60, -1))
-		self.buttonExport = wx.Button(panel, label = "export", size = (60, -1))
-		sizerFileOp.Add(self.buttonImport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
-		sizerFileOp.AddSpacer((5,0))
-		sizerFileOp.Add(self.buttonExport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
-
-		# Course List
-		self.index = 0
-		self.listCtrl = wx.ListCtrl(panel, size = (-1, 100), style = wx.LC_REPORT|wx.BORDER_SUNKEN)
-		self.listCtrl.InsertColumn(0, "semester")
-		self.listCtrl.InsertColumn(1, "type")
-		self.listCtrl.InsertColumn(2, "course code")
-		self.listCtrl.InsertColumn(3, "course name")
-
-		
-		# Semester
-		sizerSemester = wx.BoxSizer(wx.VERTICAL)
-		sizerSemester.Add(wx.StaticText(panel, label = "Semester"))	
-		semesterList = ['1', '2', '3']
-		self.choiceSemester = wx.Choice(panel, wx.ID_ANY, choices = semesterList)		
-		sizerSemester.Add(self.choiceSemester, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 2)
-		
-		# Course Type		
-		sizerType = wx.BoxSizer(wx.VERTICAL)
-		sizerType.Add(wx.StaticText(panel, label = "Type"))
-		typeList = ['major', 'literature']
-		self.choiceType = wx.Choice(panel, wx.ID_ANY, choices = typeList)
-		sizerType.Add(self.choiceType, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 2)
-		
-		# Course Code
-		sizerCode = wx.BoxSizer(wx.VERTICAL)
-		sizerCode.Add(wx.StaticText(panel, label = "Code"))
-		self.textCode = wx.TextCtrl(panel, validator = NumbersOnlyValidator())
-		sizerCode.Add(self.textCode, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL | wx.ALL, 2)		
-		
-		# Course Name
-		sizerName = wx.BoxSizer(wx.VERTICAL)
-		sizerName.Add(wx.StaticText(panel, label = "Name"))
-		self.textName = wx.TextCtrl(panel)
-		sizerName.Add(self.textName, 1, wx.ALIGN_CENTER_HORIZONTAL|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
-		
-		
-		# buttons in editbar
-		self.buttonSubmit = wx.Button(panel, label = "submit", size = (60, -1))
-#		self.buttonSubmit.Disable()
-#		self.buttonSubmit.Enable()
-		self.buttonDelete = wx.Button(panel, id = wx.ID_DELETE, label = "delete", size = (60, -1))
-		self.buttonDelete.Disable()
-		
-		
-		# Edit Bar
-		sizerEdit = wx.BoxSizer(wx.HORIZONTAL)
-		sizerEdit.Add(sizerSemester, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
-		sizerEdit.Add(sizerType, 2, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
-		sizerEdit.Add(sizerCode, 2, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
-		sizerEdit.Add(sizerName, 2, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
-		sizerEdit.Add(self.buttonSubmit, 2, wx.ALIGN_BOTTOM | wx.ALL, 2)
-		sizerEdit.AddSpacer((5,0))
-		sizerEdit.Add(self.buttonDelete, 2, wx.ALIGN_BOTTOM | wx.ALL, 2)
-		
-		# buttons
-		self.buttonOkay = wx.Button(panel, label = "OK", size = (60, -1))		
-		
-		# sizer
-		sizer = wx.BoxSizer(wx.VERTICAL)		
-		sizer.Add(sizerFileOp, 0, wx.ALL | wx.FIXED_MINSIZE, 5)
-		sizer.Add(self.listCtrl, 0, wx.ALL|wx.EXPAND, 5)
-		sizer.Add(sizerEdit, 0, wx.ALL | wx.EXPAND, 5)
-		sizer.Add(self.buttonOkay, 0, wx.ALL)
-			
-		# Events Binding
-		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.SelectEntry, self.listCtrl)
-		self.Bind(wx.EVT_BUTTON, self.ImportFromFile, self.buttonImport)
-		self.Bind(wx.EVT_BUTTON, self.ExportToFile, self.buttonExport)
-		self.Bind(wx.EVT_BUTTON, self.AddEntry, self.buttonSubmit)
-		self.Bind(wx.EVT_BUTTON, self.DeleteEntry, self.buttonDelete)
-		self.Bind(wx.EVT_BUTTON, self.SubmitData, self.buttonOkay)			
-		
-		panel.SetSizer(sizer)
-		self.SetSize((600, 400))
-		self.Show()
-		
-	def CheckEntry(self):
-		if self.choiceSemester.GetStringSelection() == "":
-			return (False, "Please select semester!")
-		if self.choiceType.GetStringSelection() == "":
-			return (False, "Please select Type!")
-		if self.textCode.GetValue() != "":
-			for letter in self.textCode.GetValue():
-				if letter < '0' or letter > '9':
-					return (False, "Numbers only")
-		if self.textCode.GetValue() == "" and self.textName.GetValue() == "":
-			return (False, "At least enter one")
-		return (True, "Success")
-
-	def SelectEntry(self, event):	
-		self.buttonDelete.Enable()
-		
-	def AddEntry(self, event):
-		status = self.CheckEntry()
-		if status[0] == False:
-			wx.MessageBox(status[1],"Input Error")
-			return
-		self.listCtrl.InsertStringItem(self.index, self.choiceSemester.GetStringSelection())
-		self.listCtrl.SetStringItem(self.index, 1, self.choiceType.GetStringSelection())
-		self.listCtrl.SetStringItem(self.index, 2, self.textCode.GetValue())
-		self.listCtrl.SetStringItem(self.index, 3, self.textName.GetValue())
-		self.index += 1
-		
-	def DeleteEntry(self, event):
-		selected = self.listCtrl.GetNextSelected(-1)
-		while selected != -1:
-			self.listCtrl.DeleteItem(selected)
-			selected = self.listCtrl.GetNextSelected(-1)
-			self.index -= 1
-		self.buttonDelete.Disable()
-	
-	def ImportFromFile(self, event):
-		openDlg = wx.FileDialog(None, style = wx.FD_OPEN, wildcard = "CSV Files (*.csv)|*.csv")
-		openDlg.ShowModal()
-		filePath = openDlg.GetPath()
-		openDlg.Destroy()
-		
-		try:
-			print "loading the file"
-			csvfile = file(filePath, 'rb')
-		except Exception, e:
-			print e
-			return
-		
-		try:
-			print "ready to write"
-			self.index = 0
-			reader = csv.reader(csvfile)
-			for row in reader:
-				self.listCtrl.InsertStringItem(self.index, row[0])
-				self.listCtrl.SetStringItem(self.index, 1, row[1])
-				self.listCtrl.SetStringItem(self.index, 2, row[2])
-				self.listCtrl.SetStringItem(self.index, 3, row[3].decode('utf-8'))
-				self.index += 1
-		except Exception, e:
-			print e
-		finally:
-			csvfile.close()
-	
-	
-	def ExportToFile(self, event):
-		# File Dialog
-		saveDlg = wx.FileDialog(None, style = wx.FD_SAVE, wildcard = "CSV Files (*.csv)|*.csv")		
-		saveDlg.ShowModal()
-		filePath = saveDlg.GetPath()
-		print "file path get"
-		saveDlg.Destroy()
-		
-		try:
-			print "loading the file..."
-			csvfile = file(filePath, 'wb')
-		except:
-			print "file openning failed"
-			return
-		try:
-			print "ready to write the file"
-			writer = csv.writer(csvfile)
-			
-			for i in range(self.index):
-				courseInfo = []
-				for j in range(4):
-					courseInfo.append(self.listCtrl.GetItem(i, j).GetText().encode('utf-8'))  #solve the encoding problem
-#				print courseInfo
-				writer.writerow(courseInfo)
-		except:
-			print "writing failed"
-		finally:
-			csvfile.close()
-	def GetCourseList(self):
-		courseList = []
-		for i in range(self.index):
-			courseInfo = []
-			for j in range(4):
-				courseInfo.append(self.listCtrl.GetItem(i, j).GetText())  #solve the encoding problem
-			courseList.append(courseInfo)
-		return courseList
-		
-	def SubmitData(self, event):
-		self.Hide()
 class LoginFrame(wx.Frame):
 	def __init__(self, parent, title):
 		wx.Frame.__init__(self, parent, title = title)  #need to set size?
@@ -283,15 +66,16 @@ class LoginFrame(wx.Frame):
 		sizerButtons = wx.BoxSizer(wx.HORIZONTAL)
 		self.buttonImport = wx.Button(self.panelRight, label = "import", size = (70, -1))
 		self.buttonExport = wx.Button(self.panelRight, label = "export", size = (70, -1))
-		self.buttonApply = wx.Button(self.panelRight, label = "apply", size = (70, -1))
+#		self.buttonApply = wx.Button(self.panelRight, label = "apply", size = (70, -1))
 		self.buttonClear = wx.Button(self.panelRight, label = "clear", size = (70, -1))
 		sizerButtons.Add(self.buttonImport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
 		sizerButtons.AddSpacer((5,0))
 		sizerButtons.Add(self.buttonExport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
 		sizerButtons.AddSpacer((5,0))
-		sizerButtons.Add(self.buttonApply, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
-		sizerButtons.AddSpacer((5,0))
+#		sizerButtons.Add(self.buttonApply, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
+#		sizerButtons.AddSpacer((5,0))
 		sizerButtons.Add(self.buttonClear, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
+		
 		
 
 		# Course List
@@ -323,7 +107,7 @@ class LoginFrame(wx.Frame):
 		# Course Code
 		sizerCode = wx.BoxSizer(wx.VERTICAL)
 		sizerCode.Add(wx.StaticText(self.panelRight, label = "Code"))
-		self.textCode = wx.TextCtrl(self.panelRight, validator = NumbersOnlyValidator())
+		self.textCode = wx.TextCtrl(self.panelRight,)
 		sizerCode.Add(self.textCode, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_LEFT | wx.ALL, 2)		
 		
 		# Course Name
@@ -358,15 +142,15 @@ class LoginFrame(wx.Frame):
 #		sizerRight.Add(self.buttonOkay, 0, wx.ALIGN_BOTTOM)
 		
 		# Events Binding
-#		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.SelectEntry, self.listCtrl)
-#		self.Bind(wx.EVT_BUTTON, self.ImportFromFile, self.buttonImport)
-#		self.Bind(wx.EVT_BUTTON, self.ExportToFile, self.buttonExport)
-#		self.Bind(wx.EVT_BUTTON, self.AddEntry, self.buttonSubmit)
-#		self.Bind(wx.EVT_BUTTON, self.DeleteEntry, self.buttonDelete)
-#		self.Bind(wx.EVT_BUTTON, self.SubmitData, self.buttonOkay)			
+		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.SelectEntry, self.listCtrl)
+		self.Bind(wx.EVT_BUTTON, self.ImportFromFile, self.buttonImport)
+		self.Bind(wx.EVT_BUTTON, self.ExportToFile, self.buttonExport)
+		self.Bind(wx.EVT_BUTTON, self.ClearList, self.buttonClear)
+		self.Bind(wx.EVT_BUTTON, self.AddEntry, self.buttonAdd)
+		self.Bind(wx.EVT_BUTTON, self.DeleteEntry, self.buttonDelete)
 		
 		self.panelRight.SetSizer(sizerRight)
-	
+
 		# ---- main panel setting ----
 	
 		mainSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -377,26 +161,34 @@ class LoginFrame(wx.Frame):
 #		self.SetMinSize((800, 350))
 		self.Show()
 
+	def ShowMessage(self, message):
+		print message
+		self.textStatus.AppendText(message + '\n')
+		
+	def CheckEntry(self):
+		if self.choiceSemester.GetStringSelection() == "":
+			return (False, "Please select semester!")
+		if self.choiceType.GetStringSelection() == "":
+			return (False, "Please select Type!")
+		if self.textCode.GetValue() != "":
+			for letter in self.textCode.GetValue():
+				if letter < '0' or letter > '9':
+					return (False, "Numbers only")
+		if self.textCode.GetValue() == "" and self.textName.GetValue() == "":
+			return (False, "At least enter one")
+		return (True, "Success")	
+		
+	# ---- event handlers	 ----
 	def Login(self, event):
 		ID = self.textID.GetValue()
 		Password = self.textPassword.GetValue()
 		print ID, Password
 		print self.GetSize()
 		self.textStatus.AppendText("ID:%s, PSW:%s" % (ID, Password) + '\n')
-#		self.frameNew = SettingFrame(self, "setting window")
-#		frameNew.ShowModal()
-#		frameNew.Show()
-#		frameNew.Destroy()
-#        newframe = LoginFrame(None, "NEW FRAME")
-#        self.Hide()
-#        newframe.Show()
 
 	def Exit(self, event):
 		self.Close(False)
 
-	def ShowMessage(self, message):
-		print message
-		self.textStatus.AppendText(message + '\n')
 	def SwitchSettingPanel(self, event):
 		if self.panelRight.IsShown() == False:
 			size = (self.GetSize()[0] + 546, self.GetSize()[1])
@@ -409,14 +201,112 @@ class LoginFrame(wx.Frame):
 			self.panelRight.Hide()
 			self.buttonSettingSwitcher.SetLabel('Expand>>>')
 			self.SetMinSize((800 - 546, 350))
-			self.SetSize(size)
-#			
+			self.SetSize(size)			
+
+	def SelectEntry(self, event):	
+		self.buttonDelete.Enable()
 		
+	def AddEntry(self, event):
+		status = self.CheckEntry()
+		if status[0] == False:
+			wx.MessageBox(status[1],"Input Error")
+			return
+		self.listCtrl.InsertStringItem(self.index, self.choiceSemester.GetStringSelection())
+		self.listCtrl.SetStringItem(self.index, 1, self.choiceType.GetStringSelection())
+		self.listCtrl.SetStringItem(self.index, 2, self.textCode.GetValue())
+		self.listCtrl.SetStringItem(self.index, 3, self.textName.GetValue())
+		self.index += 1
+		
+	def DeleteEntry(self, event):
+		selected = self.listCtrl.GetNextSelected(-1)
+		while selected != -1:
+			self.listCtrl.DeleteItem(selected)
+			selected = self.listCtrl.GetNextSelected(-1)
+			self.index -= 1
+		self.buttonDelete.Disable()
+	
+	def ImportFromFile(self, event):
+		openDlg = wx.FileDialog(None, style = wx.FD_OPEN, wildcard = "CSV Files (*.csv)|*.csv")
+		openDlg.ShowModal()
+		filePath = openDlg.GetPath()
+		openDlg.Destroy()
+		
+		try:
+			print "loading the file"
+			csvfile = file(filePath, 'rb')
+		except Exception, e:
+			if e.errno == 22:
+				print 'invalid path!'
+				self.ShowMessage('invalid path')
+			else:
+				print e
+				self.ShowMessage(str(e))
+			return
+		
+		try:
+			print "ready to write"
+			self.listCtrl.DeleteAllItems()
+			self.index = 0
+			reader = csv.reader(csvfile)
+			for row in reader:
+				self.listCtrl.InsertStringItem(self.index, row[0])
+				self.listCtrl.SetStringItem(self.index, 1, row[1])
+				self.listCtrl.SetStringItem(self.index, 2, row[2])
+				self.listCtrl.SetStringItem(self.index, 3, row[3].decode('utf-8'))
+				self.index += 1
+		except Exception, e:
+			print e
+		finally:
+			csvfile.close()
+	
+	def ExportToFile(self, event):
+		# File Dialog
+		saveDlg = wx.FileDialog(None, style = wx.FD_SAVE, wildcard = "CSV Files (*.csv)|*.csv")		
+		saveDlg.ShowModal()
+		filePath = saveDlg.GetPath()
+		print "file path get"
+		saveDlg.Destroy()
+		
+		try:
+			print "loading the file..."
+			csvfile = file(filePath, 'wb')
+		except Exception, e:
+			if e.errno == 22:
+				print "invalid path"
+				self.ShowMessage("invalid path")
+			else:
+				print e
+				self.ShowMessage(str(e))
+			return
+		try:
+			print "ready to write the file"
+			writer = csv.writer(csvfile)
+			
+			for i in range(self.index):
+				courseInfo = []
+				for j in range(4):
+					courseInfo.append(self.listCtrl.GetItem(i, j).GetText().encode('utf-8'))  #solve the encoding problem
+#				print courseInfo
+				writer.writerow(courseInfo)
+		except:
+			print "writing failed"
+		finally:
+			csvfile.close()
+	def GetCourseList(self):
+		courseList = []
+		for i in range(self.index):
+			courseInfo = []
+			for j in range(4):
+				courseInfo.append(self.listCtrl.GetItem(i, j).GetText())  #solve the encoding problem
+			courseList.append(courseInfo)
+		return courseList
+		
+	def ClearList(self, event):
+		self.listCtrl.DeleteAllItems()
+		self.index = 0
 	
 if __name__ == "__main__":
 	app = wx.App(False)
 	frame = LoginFrame(None, "Login Window")
 	app.MainLoop()
-#	print frame.GetCourseList
-#	frame.Close()
 	app.Destroy()
