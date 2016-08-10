@@ -228,60 +228,63 @@ class LoginFrame(wx.Frame):
 	
 		
 		# ---- LEFT SIZER ---
-		panelLeft = wx.Panel(mainPanel, wx.ID_ANY)
+		self.panelLeft = wx.Panel(mainPanel, wx.ID_ANY)
 
 		#Student ID
 		sizerID = wx.BoxSizer(wx.HORIZONTAL)
-		sizerID.Add(wx.StaticText(panelLeft, label = "Student ID:", size = (70, -1)), 2, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
-		self.textID = wx.TextCtrl(panelLeft)
+		sizerID.Add(wx.StaticText(self.panelLeft, label = "Student ID:", size = (70, -1)), 2, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
+		self.textID = wx.TextCtrl(self.panelLeft)
 		sizerID.AddSpacer((5,0))
 		sizerID.Add(self.textID, 5, wx.EXPAND | wx.ALL, 2)
 		
 		#Password
 		sizerPassword = wx.BoxSizer(wx.HORIZONTAL)
-		sizerPassword.Add(wx.StaticText(panelLeft, label = "Password:", size = (70,-1)), 2, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
-		self.textPassword = wx.TextCtrl(panelLeft, style = wx.TE_PASSWORD)
+		sizerPassword.Add(wx.StaticText(self.panelLeft, label = "Password:", size = (70,-1)), 2, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
+		self.textPassword = wx.TextCtrl(self.panelLeft, style = wx.TE_PASSWORD)
 		sizerPassword.AddSpacer((5,0))
 		sizerPassword.Add(self.textPassword, 5, wx.EXPAND | wx.ALL, 2)
 		
 		#Buttons
-		self.buttonLogin = wx.Button(panelLeft, label = "Login", size = (80,-1))
-		self.buttonExit = wx.Button(panelLeft, label = "Exit", size = (80,-1))
+		self.buttonLogin = wx.Button(self.panelLeft, label = "Login", size = (80,-1))
+		self.buttonExit = wx.Button(self.panelLeft, label = "Exit", size = (80,-1))
 		sizerButton = wx.BoxSizer(wx.HORIZONTAL)
 		sizerButton.Add(self.buttonLogin, 1, wx.FIXED_MINSIZE)
 		sizerButton.AddSpacer((15,0))
 		sizerButton.Add(self.buttonExit, 1, wx.FIXED_MINSIZE)
 		
 		# Status Box
-		self.textStatus = wx.TextCtrl(panelLeft, style = wx.TE_MULTILINE, size = (-1, 700))
+		self.textStatus = wx.TextCtrl(self.panelLeft, style = wx.TE_MULTILINE)
 		self.textStatus.SetEditable(False)
 		
 		# Button - setting panel control
-		self.buttonSettingCtrl = wx.Button(panelLeft, label = "Collapse<<<", size = (100, -1))		
+		self.buttonSettingSwitcher = wx.Button(self.panelLeft, label = "Collapse<<<", size = (100, -1))		
 		
 		#sizer
 		sizerLeft = wx.BoxSizer(wx.VERTICAL)
 		sizerLeft.Add(sizerID,0,wx.ALIGN_CENTER | wx.ALL, 2)
 		sizerLeft.Add(sizerPassword,0,wx.ALIGN_CENTER | wx.ALL, 2)
 		sizerLeft.Add(sizerButton,0,wx.ALIGN_CENTER | wx.ALL, 5)
-		sizerLeft.Add(self.textStatus, 0, wx.ALL | wx.EXPAND, 5)	
+		sizerLeft.Add(self.textStatus, 100, wx.ALL | wx.EXPAND, 5)
+		sizerLeft.Add(self.buttonSettingSwitcher, 1, wx.ALIGN_RIGHT | wx.ALL, 5)
+		sizerLeft.AddSpacer((0, 3))
 		
 		#binding events
 		self.Bind(wx.EVT_BUTTON, self.Login, self.buttonLogin)
 		self.Bind(wx.EVT_BUTTON, self.Exit, self.buttonExit)
+		self.Bind(wx.EVT_BUTTON, self.SwitchSettingPanel, self.buttonSettingSwitcher)
 		
-		panelLeft.SetSizer(sizerLeft)
+		self.panelLeft.SetSizer(sizerLeft)
 
 
 		# ---- RIGHT SIZER ---
-		panelRight = wx.Panel(mainPanel, wx.ID_ANY)
+		self.panelRight = wx.Panel(mainPanel, wx.ID_ANY)
 
 		# Buttons - Operation
 		sizerButtons = wx.BoxSizer(wx.HORIZONTAL)
-		self.buttonImport = wx.Button(panelRight, label = "import", size = (70, -1))
-		self.buttonExport = wx.Button(panelRight, label = "export", size = (70, -1))
-		self.buttonApply = wx.Button(panelRight, label = "apply", size = (70, -1))
-		self.buttonClear = wx.Button(panelRight, label = "clear", size = (70, -1))
+		self.buttonImport = wx.Button(self.panelRight, label = "import", size = (70, -1))
+		self.buttonExport = wx.Button(self.panelRight, label = "export", size = (70, -1))
+		self.buttonApply = wx.Button(self.panelRight, label = "apply", size = (70, -1))
+		self.buttonClear = wx.Button(self.panelRight, label = "clear", size = (70, -1))
 		sizerButtons.Add(self.buttonImport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
 		sizerButtons.AddSpacer((5,0))
 		sizerButtons.Add(self.buttonExport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
@@ -293,7 +296,7 @@ class LoginFrame(wx.Frame):
 
 		# Course List
 		self.index = 0
-		self.listCtrl = wx.ListCtrl(panelRight, style = wx.LC_REPORT|wx.BORDER_SUNKEN)
+		self.listCtrl = wx.ListCtrl(self.panelRight, style = wx.LC_REPORT|wx.BORDER_SUNKEN)
 		self.listCtrl.InsertColumn(0, "semester")
 		self.listCtrl.InsertColumn(1, "type")
 		self.listCtrl.InsertColumn(2, "course code")
@@ -302,40 +305,39 @@ class LoginFrame(wx.Frame):
 		self.listCtrl.SetColumnWidth(1, 120)
 		self.listCtrl.SetColumnWidth(2, 160)
 		self.listCtrl.SetColumnWidth(3, 160)
-
 		
 		# Semester
 		sizerSemester = wx.BoxSizer(wx.VERTICAL)
-		sizerSemester.Add(wx.StaticText(panelRight, label = "Semester"))	
+		sizerSemester.Add(wx.StaticText(self.panelRight, label = "Semester"))	
 		semesterList = ['1', '2', '3']
-		self.choiceSemester = wx.Choice(panelRight, wx.ID_ANY, choices = semesterList)		
+		self.choiceSemester = wx.Choice(self.panelRight, wx.ID_ANY, choices = semesterList)		
 		sizerSemester.Add(self.choiceSemester, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_LEFT | wx.ALL, 2)
 		
 		# Course Type		
 		sizerType = wx.BoxSizer(wx.VERTICAL)
-		sizerType.Add(wx.StaticText(panelRight, label = "Type"))
+		sizerType.Add(wx.StaticText(self.panelRight, label = "Type"))
 		typeList = ['major', 'literature']
-		self.choiceType = wx.Choice(panelRight, wx.ID_ANY, choices = typeList)
+		self.choiceType = wx.Choice(self.panelRight, wx.ID_ANY, choices = typeList)
 		sizerType.Add(self.choiceType, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_LEFT | wx.ALL, 2)
 		
 		# Course Code
 		sizerCode = wx.BoxSizer(wx.VERTICAL)
-		sizerCode.Add(wx.StaticText(panelRight, label = "Code"))
-		self.textCode = wx.TextCtrl(panelRight, validator = NumbersOnlyValidator())
+		sizerCode.Add(wx.StaticText(self.panelRight, label = "Code"))
+		self.textCode = wx.TextCtrl(self.panelRight, validator = NumbersOnlyValidator())
 		sizerCode.Add(self.textCode, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_LEFT | wx.ALL, 2)		
 		
 		# Course Name
 		sizerName = wx.BoxSizer(wx.VERTICAL)
-		sizerName.Add(wx.StaticText(panelRight, label = "Name"))
-		self.textName = wx.TextCtrl(panelRight)
+		sizerName.Add(wx.StaticText(self.panelRight, label = "Name"))
+		self.textName = wx.TextCtrl(self.panelRight)
 		sizerName.Add(self.textName, 1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
 		
 		
 		# buttons in editbar
-		self.buttonAdd = wx.Button(panelRight, id = wx.ID_ADD, label = "Add", size = (70, -1))
+		self.buttonAdd = wx.Button(self.panelRight, id = wx.ID_ADD, label = "Add", size = (70, -1))
 #		self.buttonSubmit.Disable()
 #		self.buttonSubmit.Enable()
-		self.buttonDelete = wx.Button(panelRight, id = wx.ID_DELETE, label = "Delete", size = (70, -1))
+		self.buttonDelete = wx.Button(self.panelRight, id = wx.ID_DELETE, label = "Delete", size = (70, -1))
 		self.buttonDelete.Disable()
 		
 		
@@ -363,23 +365,23 @@ class LoginFrame(wx.Frame):
 #		self.Bind(wx.EVT_BUTTON, self.DeleteEntry, self.buttonDelete)
 #		self.Bind(wx.EVT_BUTTON, self.SubmitData, self.buttonOkay)			
 		
-		panelRight.SetSizer(sizerRight)
+		self.panelRight.SetSizer(sizerRight)
 	
 		# ---- main panel setting ----
 	
 		mainSizer = wx.BoxSizer(wx.HORIZONTAL)
 		mainPanel.SetSizer(mainSizer)	
-		mainSizer.Add(panelLeft, 1, wx.ALL | wx.ALIGN_CENTER, 2)
-		mainSizer.AddSpacer((10, 0))
-		mainSizer.Add(panelRight, 0, wx.ALL | wx.ALIGN_CENTER, 2)
+		mainSizer.Add(self.panelLeft, 1, wx.ALL | wx.ALIGN_CENTER, 2)
+		mainSizer.Add(self.panelRight, 0, wx.ALL | wx.ALIGN_CENTER, 2)
 		self.SetSize((900, 500))
-		self.SetMinSize((780, 300))
+#		self.SetMinSize((800, 350))
 		self.Show()
 
 	def Login(self, event):
 		ID = self.textID.GetValue()
 		Password = self.textPassword.GetValue()
 		print ID, Password
+		print self.GetSize()
 		self.textStatus.AppendText("ID:%s, PSW:%s" % (ID, Password) + '\n')
 #		self.frameNew = SettingFrame(self, "setting window")
 #		frameNew.ShowModal()
@@ -395,6 +397,21 @@ class LoginFrame(wx.Frame):
 	def ShowMessage(self, message):
 		print message
 		self.textStatus.AppendText(message + '\n')
+	def SwitchSettingPanel(self, event):
+		if self.panelRight.IsShown() == False:
+			size = (self.GetSize()[0] + 546, self.GetSize()[1])
+			self.panelRight.Show()
+			self.buttonSettingSwitcher.SetLabel('Collapse<<<')
+			self.SetSize(size)
+			self.SetMinSize((800, 350))
+		else:
+			size = (self.GetSize()[0] - 546, self.GetSize()[1])
+			self.panelRight.Hide()
+			self.buttonSettingSwitcher.SetLabel('Expand>>>')
+			self.SetMinSize((800 - 546, 350))
+			self.SetSize(size)
+#			
+		
 	
 if __name__ == "__main__":
 	app = wx.App(False)
