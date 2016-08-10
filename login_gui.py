@@ -5,7 +5,7 @@ import csv
 
 class LoginFrame(wx.Frame):
 	def __init__(self, parent, title):
-		wx.Frame.__init__(self, parent, title = title)  #need to set size?
+		wx.Frame.__init__(self, parent, title = title)
 		
 		mainPanel = wx.Panel(self, wx.ID_ANY)
 	
@@ -29,13 +29,14 @@ class LoginFrame(wx.Frame):
 		
 		# Captcha
 		sizerCaptcha = wx.BoxSizer(wx.HORIZONTAL)
-		captchaBmp = wx.Image('code.jpg', wx.BITMAP_TYPE_JPEG).Scale(42, 20).ConvertToBitmap()
-		self.buttonCaptcha = wx.BitmapButton(self.panelLeft, bitmap = captchaBmp)
+		captchaBmp = wx.Image('code.jpg', wx.BITMAP_TYPE_JPEG).Scale(63, 30).ConvertToBitmap()
+		self.bitmapCaptcha = wx.StaticBitmap(self.panelLeft, bitmap = captchaBmp)
 		self.textCaptcha = wx.TextCtrl(self.panelLeft, size = (70, -1))
 		self.checkAutoRecognize = wx.CheckBox(self.panelLeft, label = "auto recg")
-		sizerCaptcha.Add(self.buttonCaptcha, 0, wx.ALIGN_CENTER | wx.ALL, 2)
+		sizerCaptcha.Add(self.bitmapCaptcha, 0, wx.ALIGN_CENTER | wx.ALL, 2)
 		sizerCaptcha.AddSpacer((5, 0))
 		sizerCaptcha.Add(self.textCaptcha, 1, wx.ALIGN_CENTER | wx.ALL, 2)	
+		sizerCaptcha.AddSpacer((5, 0))
 		sizerCaptcha.Add(self.checkAutoRecognize, 0, wx.ALIGN_CENTER | wx.ALL, 2)
 		
 		#Buttons
@@ -68,6 +69,8 @@ class LoginFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.Exit, self.buttonExit)
 		self.Bind(wx.EVT_BUTTON, self.SwitchSettingPanel, self.buttonSettingSwitcher)
 		self.Bind(wx.EVT_CHECKBOX, self.SwitchManualCaptcha, self.checkAutoRecognize)
+		
+		
 		self.panelLeft.SetSizer(sizerLeft)
 
 
@@ -128,14 +131,10 @@ class LoginFrame(wx.Frame):
 		self.textName = wx.TextCtrl(self.panelRight)
 		sizerName.Add(self.textName, 1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
 		
-		
 		# buttons in editbar
 		self.buttonAdd = wx.Button(self.panelRight, id = wx.ID_ADD, label = "Add", size = (70, -1))
-#		self.buttonSubmit.Disable()
-#		self.buttonSubmit.Enable()
 		self.buttonDelete = wx.Button(self.panelRight, id = wx.ID_DELETE, label = "Delete", size = (70, -1))
 		self.buttonDelete.Disable()
-		
 		
 		# Edit Bar
 		sizerEdit = wx.BoxSizer(wx.HORIZONTAL)
@@ -151,7 +150,6 @@ class LoginFrame(wx.Frame):
 		sizerRight.Add(sizerButtons, 1, wx.ALL | wx.ALIGN_CENTER | wx.FIXED_MINSIZE, 5)
 		sizerRight.Add(self.listCtrl, 50, wx.ALL|wx.EXPAND, 5)  # 50 - ensure the listctrl would expand	
 		sizerRight.Add(sizerEdit, 0, wx.ALL | wx.ALIGN_CENTER , 5)
-#		sizerRight.Add(self.buttonOkay, 0, wx.ALIGN_BOTTOM)
 		
 		# Events Binding
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.SelectEntry, self.listCtrl)
@@ -163,14 +161,14 @@ class LoginFrame(wx.Frame):
 		
 		self.panelRight.SetSizer(sizerRight)
 
-		# ---- main panel setting ----
+		# ---- MAIN PANEL SETTING ----
 	
 		mainSizer = wx.BoxSizer(wx.HORIZONTAL)
 		mainPanel.SetSizer(mainSizer)	
 		mainSizer.Add(self.panelLeft, 1, wx.ALL | wx.ALIGN_CENTER, 2)
 		mainSizer.Add(self.panelRight, 0, wx.ALL | wx.ALIGN_CENTER, 2)
 		self.SetSize((900, 500))
-#		self.SetMinSize((800, 350))
+		self.SetMinSize((800, 350))
 		self.Show()
 
 	def ShowMessage(self, message):
@@ -205,10 +203,8 @@ class LoginFrame(wx.Frame):
 		status = self.checkAutoRecognize.IsChecked()
 		if status == True:
 			self.textCaptcha.Disable()
-			self.buttonCaptcha.Disable()
 		else:
 			self.textCaptcha.Enable()
-			self.buttonCaptcha.Enable()
 
 	def SwitchSettingPanel(self, event):
 		if self.panelRight.IsShown() == False:
