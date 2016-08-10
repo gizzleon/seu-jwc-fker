@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import wx
 import csv
 
@@ -222,7 +224,11 @@ class LoginFrame(wx.Frame):
 	def __init__(self, parent, title):
 		wx.Frame.__init__(self, parent, title = title)  #need to set size?
 		
-		panelLeft = wx.Panel(self, wx.ID_ANY)
+		mainPanel = wx.Panel(self, wx.ID_ANY)
+	
+		
+		# ---- LEFT SIZER ---
+		panelLeft = wx.Panel(mainPanel, wx.ID_ANY)
 
 		#Student ID
 		sizerID = wx.BoxSizer(wx.HORIZONTAL)
@@ -238,37 +244,136 @@ class LoginFrame(wx.Frame):
 		sizerPassword.AddSpacer((5,0))
 		sizerPassword.Add(self.textPassword, 5, wx.EXPAND | wx.ALL, 2)
 		
-		#buttons
-		self.buttonLogin = wx.Button(panelLeft, label = "Login", size = (100,-1))
-		self.buttonExit = wx.Button(panelLeft, label = "Exit", size = (100,-1))
+		#Buttons
+		self.buttonLogin = wx.Button(panelLeft, label = "Login", size = (80,-1))
+		self.buttonExit = wx.Button(panelLeft, label = "Exit", size = (80,-1))
 		sizerButton = wx.BoxSizer(wx.HORIZONTAL)
-		sizerButton.Add(self.buttonLogin, 1, wx.FIXED_MINSIZE,10)
+		sizerButton.Add(self.buttonLogin, 1, wx.FIXED_MINSIZE)
 		sizerButton.AddSpacer((15,0))
-		sizerButton.Add(self.buttonExit, 1, wx.FIXED_MINSIZE,10)
+		sizerButton.Add(self.buttonExit, 1, wx.FIXED_MINSIZE)
 		
-		#Status Box
-		self.textStatus = wx.TextCtrl(panelLeft, style = wx.TE_MULTILINE, size = (-1, 600))
+		# Status Box
+		self.textStatus = wx.TextCtrl(panelLeft, style = wx.TE_MULTILINE, size = (-1, 700))
 		self.textStatus.SetEditable(False)
+		
+		# Button - setting panel control
+		self.buttonSettingCtrl = wx.Button(panelLeft, label = "Collapse<<<", size = (100, -1))		
 		
 		#sizer
 		sizerLeft = wx.BoxSizer(wx.VERTICAL)
 		sizerLeft.Add(sizerID,0,wx.ALIGN_CENTER | wx.ALL, 2)
 		sizerLeft.Add(sizerPassword,0,wx.ALIGN_CENTER | wx.ALL, 2)
 		sizerLeft.Add(sizerButton,0,wx.ALIGN_CENTER | wx.ALL, 5)
-		sizerLeft.Add(self.textStatus, 0, wx.ALL | wx.EXPAND, 5)
-		
+		sizerLeft.Add(self.textStatus, 0, wx.ALL | wx.EXPAND, 5)	
 		
 		#binding events
 		self.Bind(wx.EVT_BUTTON, self.Login, self.buttonLogin)
 		self.Bind(wx.EVT_BUTTON, self.Exit, self.buttonExit)
-		panelLeft.SetSizer(sizerLeft)
-		panelLeft.SetAutoLayout(1)
-	
 		
-		self.SetSize((350,400))
-		self.SetMinSize((300,400))
-		self.SetMaxSize((500,650))
-		#self.sizer.SetMinSize((400,400))
+		panelLeft.SetSizer(sizerLeft)
+
+
+		# ---- RIGHT SIZER ---
+		panelRight = wx.Panel(mainPanel, wx.ID_ANY)
+
+		# Buttons - Operation
+		sizerButtons = wx.BoxSizer(wx.HORIZONTAL)
+		self.buttonImport = wx.Button(panelRight, label = "import", size = (70, -1))
+		self.buttonExport = wx.Button(panelRight, label = "export", size = (70, -1))
+		self.buttonApply = wx.Button(panelRight, label = "apply", size = (70, -1))
+		self.buttonClear = wx.Button(panelRight, label = "clear", size = (70, -1))
+		sizerButtons.Add(self.buttonImport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
+		sizerButtons.AddSpacer((5,0))
+		sizerButtons.Add(self.buttonExport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
+		sizerButtons.AddSpacer((5,0))
+		sizerButtons.Add(self.buttonApply, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
+		sizerButtons.AddSpacer((5,0))
+		sizerButtons.Add(self.buttonClear, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
+		
+
+		# Course List
+		self.index = 0
+		self.listCtrl = wx.ListCtrl(panelRight, style = wx.LC_REPORT|wx.BORDER_SUNKEN)
+		self.listCtrl.InsertColumn(0, "semester")
+		self.listCtrl.InsertColumn(1, "type")
+		self.listCtrl.InsertColumn(2, "course code")
+		self.listCtrl.InsertColumn(3, "course name")
+		self.listCtrl.SetColumnWidth(0, 70)
+		self.listCtrl.SetColumnWidth(1, 120)
+		self.listCtrl.SetColumnWidth(2, 160)
+		self.listCtrl.SetColumnWidth(3, 160)
+
+		
+		# Semester
+		sizerSemester = wx.BoxSizer(wx.VERTICAL)
+		sizerSemester.Add(wx.StaticText(panelRight, label = "Semester"))	
+		semesterList = ['1', '2', '3']
+		self.choiceSemester = wx.Choice(panelRight, wx.ID_ANY, choices = semesterList)		
+		sizerSemester.Add(self.choiceSemester, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_LEFT | wx.ALL, 2)
+		
+		# Course Type		
+		sizerType = wx.BoxSizer(wx.VERTICAL)
+		sizerType.Add(wx.StaticText(panelRight, label = "Type"))
+		typeList = ['major', 'literature']
+		self.choiceType = wx.Choice(panelRight, wx.ID_ANY, choices = typeList)
+		sizerType.Add(self.choiceType, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_LEFT | wx.ALL, 2)
+		
+		# Course Code
+		sizerCode = wx.BoxSizer(wx.VERTICAL)
+		sizerCode.Add(wx.StaticText(panelRight, label = "Code"))
+		self.textCode = wx.TextCtrl(panelRight, validator = NumbersOnlyValidator())
+		sizerCode.Add(self.textCode, 1, wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_LEFT | wx.ALL, 2)		
+		
+		# Course Name
+		sizerName = wx.BoxSizer(wx.VERTICAL)
+		sizerName.Add(wx.StaticText(panelRight, label = "Name"))
+		self.textName = wx.TextCtrl(panelRight)
+		sizerName.Add(self.textName, 1, wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 2)
+		
+		
+		# buttons in editbar
+		self.buttonAdd = wx.Button(panelRight, id = wx.ID_ADD, label = "Add", size = (70, -1))
+#		self.buttonSubmit.Disable()
+#		self.buttonSubmit.Enable()
+		self.buttonDelete = wx.Button(panelRight, id = wx.ID_DELETE, label = "Delete", size = (70, -1))
+		self.buttonDelete.Disable()
+		
+		
+		# Edit Bar
+		sizerEdit = wx.BoxSizer(wx.HORIZONTAL)
+		sizerEdit.Add(sizerSemester, 0, wx.ALIGN_BOTTOM | wx.ALL, 2)
+		sizerEdit.Add(sizerType, 0, wx.ALIGN_BOTTOM | wx.ALL, 2)
+		sizerEdit.Add(sizerCode, 0, wx.ALIGN_BOTTOM | wx.ALL, 2)
+		sizerEdit.Add(sizerName, 0, wx.ALIGN_BOTTOM | wx.ALL, 2)
+		sizerEdit.Add(self.buttonAdd, 0, wx.ALIGN_BOTTOM | wx.ALL, 2)
+		sizerEdit.Add(self.buttonDelete, 0, wx.ALIGN_BOTTOM | wx.ALL, 2)
+		
+		# sizer
+		sizerRight = wx.BoxSizer(wx.VERTICAL)		
+		sizerRight.Add(sizerButtons, 1, wx.ALL | wx.ALIGN_CENTER | wx.FIXED_MINSIZE, 5)
+		sizerRight.Add(self.listCtrl, 50, wx.ALL|wx.EXPAND, 5)  # 50 - ensure the listctrl would expand	
+		sizerRight.Add(sizerEdit, 0, wx.ALL | wx.ALIGN_CENTER , 5)
+#		sizerRight.Add(self.buttonOkay, 0, wx.ALIGN_BOTTOM)
+		
+		# Events Binding
+#		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.SelectEntry, self.listCtrl)
+#		self.Bind(wx.EVT_BUTTON, self.ImportFromFile, self.buttonImport)
+#		self.Bind(wx.EVT_BUTTON, self.ExportToFile, self.buttonExport)
+#		self.Bind(wx.EVT_BUTTON, self.AddEntry, self.buttonSubmit)
+#		self.Bind(wx.EVT_BUTTON, self.DeleteEntry, self.buttonDelete)
+#		self.Bind(wx.EVT_BUTTON, self.SubmitData, self.buttonOkay)			
+		
+		panelRight.SetSizer(sizerRight)
+	
+		# ---- main panel setting ----
+	
+		mainSizer = wx.BoxSizer(wx.HORIZONTAL)
+		mainPanel.SetSizer(mainSizer)	
+		mainSizer.Add(panelLeft, 1, wx.ALL | wx.ALIGN_CENTER, 2)
+		mainSizer.AddSpacer((10, 0))
+		mainSizer.Add(panelRight, 0, wx.ALL | wx.ALIGN_CENTER, 2)
+		self.SetSize((900, 500))
+		self.SetMinSize((780, 300))
 		self.Show()
 
 	def Login(self, event):
@@ -276,7 +381,7 @@ class LoginFrame(wx.Frame):
 		Password = self.textPassword.GetValue()
 		print ID, Password
 		self.textStatus.AppendText("ID:%s, PSW:%s" % (ID, Password) + '\n')
-		self.frameNew = SettingFrame(self, "setting window")
+#		self.frameNew = SettingFrame(self, "setting window")
 #		frameNew.ShowModal()
 #		frameNew.Show()
 #		frameNew.Destroy()
@@ -286,8 +391,11 @@ class LoginFrame(wx.Frame):
 
 	def Exit(self, event):
 		self.Close(False)
-		self.Destroy()
 
+	def ShowMessage(self, message):
+		print message
+		self.textStatus.AppendText(message + '\n')
+	
 if __name__ == "__main__":
 	app = wx.App(False)
 	frame = LoginFrame(None, "Login Window")
