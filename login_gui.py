@@ -13,19 +13,30 @@ class LoginFrame(wx.Frame):
 		# ---- LEFT SIZER ---
 		self.panelLeft = wx.Panel(mainPanel, wx.ID_ANY)
 
-		#Student ID
+		# Student ID
 		sizerID = wx.BoxSizer(wx.HORIZONTAL)
 		sizerID.Add(wx.StaticText(self.panelLeft, label = "Student ID:", size = (70, -1)), 2, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
 		self.textID = wx.TextCtrl(self.panelLeft)
 		sizerID.AddSpacer((5,0))
 		sizerID.Add(self.textID, 5, wx.EXPAND | wx.ALL, 2)
 		
-		#Password
+		# Password
 		sizerPassword = wx.BoxSizer(wx.HORIZONTAL)
 		sizerPassword.Add(wx.StaticText(self.panelLeft, label = "Password:", size = (70,-1)), 2, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 2)
 		self.textPassword = wx.TextCtrl(self.panelLeft, style = wx.TE_PASSWORD)
 		sizerPassword.AddSpacer((5,0))
 		sizerPassword.Add(self.textPassword, 5, wx.EXPAND | wx.ALL, 2)
+		
+		# Captcha
+		sizerCaptcha = wx.BoxSizer(wx.HORIZONTAL)
+		captchaBmp = wx.Image('code.jpg', wx.BITMAP_TYPE_JPEG).Scale(42, 20).ConvertToBitmap()
+		self.buttonCaptcha = wx.BitmapButton(self.panelLeft, bitmap = captchaBmp)
+		self.textCaptcha = wx.TextCtrl(self.panelLeft, size = (70, -1))
+		self.checkAutoRecognize = wx.CheckBox(self.panelLeft, label = "auto recg")
+		sizerCaptcha.Add(self.buttonCaptcha, 0, wx.ALIGN_CENTER | wx.ALL, 2)
+		sizerCaptcha.AddSpacer((5, 0))
+		sizerCaptcha.Add(self.textCaptcha, 1, wx.ALIGN_CENTER | wx.ALL, 2)	
+		sizerCaptcha.Add(self.checkAutoRecognize, 0, wx.ALIGN_CENTER | wx.ALL, 2)
 		
 		#Buttons
 		self.buttonLogin = wx.Button(self.panelLeft, label = "Login", size = (80,-1))
@@ -46,6 +57,7 @@ class LoginFrame(wx.Frame):
 		sizerLeft = wx.BoxSizer(wx.VERTICAL)
 		sizerLeft.Add(sizerID,0,wx.ALIGN_CENTER | wx.ALL, 2)
 		sizerLeft.Add(sizerPassword,0,wx.ALIGN_CENTER | wx.ALL, 2)
+		sizerLeft.Add(sizerCaptcha, 0, wx.ALIGN_CENTER | wx.ALL, 2)
 		sizerLeft.Add(sizerButton,0,wx.ALIGN_CENTER | wx.ALL, 5)
 		sizerLeft.Add(self.textStatus, 100, wx.ALL | wx.EXPAND, 5)
 		sizerLeft.Add(self.buttonSettingSwitcher, 1, wx.ALIGN_RIGHT | wx.ALL, 5)
@@ -55,7 +67,7 @@ class LoginFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.Login, self.buttonLogin)
 		self.Bind(wx.EVT_BUTTON, self.Exit, self.buttonExit)
 		self.Bind(wx.EVT_BUTTON, self.SwitchSettingPanel, self.buttonSettingSwitcher)
-		
+		self.Bind(wx.EVT_CHECKBOX, self.SwitchManualCaptcha, self.checkAutoRecognize)
 		self.panelLeft.SetSizer(sizerLeft)
 
 
@@ -188,6 +200,15 @@ class LoginFrame(wx.Frame):
 
 	def Exit(self, event):
 		self.Close(False)
+
+	def SwitchManualCaptcha(self, event):
+		status = self.checkAutoRecognize.IsChecked()
+		if status == True:
+			self.textCaptcha.Disable()
+			self.buttonCaptcha.Disable()
+		else:
+			self.textCaptcha.Enable()
+			self.buttonCaptcha.Enable()
 
 	def SwitchSettingPanel(self, event):
 		if self.panelRight.IsShown() == False:
