@@ -2,7 +2,8 @@
 
 import wx
 import csv
-
+from wx.lib.wordwrap import wordwrap
+		
 class LoginFrame(wx.Frame):
 	def __init__(self, parent, title):
 		wx.Frame.__init__(self, parent, title = title)
@@ -83,14 +84,15 @@ class LoginFrame(wx.Frame):
 		self.buttonExport = wx.Button(self.panelRight, label = "export", size = (70, -1))
 #		self.buttonApply = wx.Button(self.panelRight, label = "apply", size = (70, -1))
 		self.buttonClear = wx.Button(self.panelRight, label = "clear", size = (70, -1))
+		self.buttonAbout = wx.Button(self.panelRight, label = "about", size = (70, -1))
 		sizerButtons.Add(self.buttonImport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
 		sizerButtons.AddSpacer((5,0))
 		sizerButtons.Add(self.buttonExport, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
-		sizerButtons.AddSpacer((5,0))
 #		sizerButtons.Add(self.buttonApply, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
-#		sizerButtons.AddSpacer((5,0))
-		sizerButtons.Add(self.buttonClear, 1, wx.FIXED_MINSIZE | wx.ALL, 2)
-		
+		sizerButtons.AddSpacer((5,0))
+		sizerButtons.Add(self.buttonClear, 1, wx.FIXED_MINSIZE | wx.ALL, 2)		
+		sizerButtons.AddSpacer((5,0))
+		sizerButtons.Add(self.buttonAbout, 1, wx.FIXED_MINSIZE | wx.ALL, 2)		
 		
 
 		# Course List
@@ -156,6 +158,7 @@ class LoginFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.ImportFromFile, self.buttonImport)
 		self.Bind(wx.EVT_BUTTON, self.ExportToFile, self.buttonExport)
 		self.Bind(wx.EVT_BUTTON, self.ClearList, self.buttonClear)
+		self.Bind(wx.EVT_BUTTON, self.ShowAbout, self.buttonAbout)
 		self.Bind(wx.EVT_BUTTON, self.AddEntry, self.buttonAdd)
 		self.Bind(wx.EVT_BUTTON, self.DeleteEntry, self.buttonDelete)
 		
@@ -321,6 +324,13 @@ class LoginFrame(wx.Frame):
 	def ClearList(self, event):
 		self.listCtrl.DeleteAllItems()
 		self.index = 0
+		
+	def ShowAbout(self, event):
+		info = wx.AboutDialogInfo()
+		info.Name = 'About'
+		info.Description = wordwrap('asdf '*100, 300, wx.ClientDC(self))
+		info.WebSite = ('http://www.baidu.com', '???')
+		wx.AboutBox(info)
 	
 if __name__ == "__main__":
 	app = wx.App(False)
