@@ -191,6 +191,44 @@ class LoginFrame(wx.Frame):
 			return (False, "At least enter one")
 		return (True, "Success")	
 		
+	def GetCourseList(self):
+		courseList = []
+		for i in range(self.index):
+			courseInfo = []
+			for j in range(4):
+				courseInfo.append(self.listCtrl.GetItem(i, j).GetText())  #solve the encoding problem
+			courseList.append(courseInfo)
+		return courseList
+		
+	def	PreprocessCourseList(self, courseList):
+		courseTypes = ['major', 'literature']
+		semesterRange = ['1', '2', '3']
+		validCourses = []
+		for course in courseList:
+			if course[0] not in semesterRange:
+				print 'a course is eliminated'
+				continue
+			if course[1] not in courseTypes:
+				print 'a course is eliminated'
+				continue
+			if course[0] == '1' and course[1] != 'major':
+				print 'a course is eliminated'
+				continue
+			if course[2] != "":
+				for letter in course[2]:  # check if it is a valid code number
+					if letter < '0' or letter > '9':
+						print 'a course is eliminated'
+						continue
+				else:
+					validCourses.append(course)
+				continue
+			else:
+				if course[3] == "": # both code and name are empty
+					print 'a course is eliminated'
+					continue
+			validCourses.append(course)
+		return validCourses
+		
 	# ---- event handlers	 ----
 	def Login(self, event):
 		ID = self.textID.GetValue()
@@ -312,15 +350,6 @@ class LoginFrame(wx.Frame):
 			print "writing failed"
 		finally:
 			csvfile.close()
-	def GetCourseList(self):
-		courseList = []
-		for i in range(self.index):
-			courseInfo = []
-			for j in range(4):
-				courseInfo.append(self.listCtrl.GetItem(i, j).GetText())  #solve the encoding problem
-			courseList.append(courseInfo)
-		return courseList
-		
 	def ClearList(self, event):
 		self.listCtrl.DeleteAllItems()
 		self.index = 0
